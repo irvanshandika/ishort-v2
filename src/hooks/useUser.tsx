@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 interface User {
   uid: string;
@@ -34,7 +34,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     role: "user",
     status: "active",
     createdAt: "2024-01-15",
-    signType: "google"
+    signType: "google",
   });
 
   const [loading] = useState(false);
@@ -50,11 +50,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     console.log("Logout called");
   };
 
-  return (
-    <UserContext.Provider value={{ user, loading, error, updateUser, logout }}>
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext.Provider value={{ user, loading, error, updateUser, logout }}>{children}</UserContext.Provider>;
 }
 
 export function useUser() {
@@ -120,7 +116,7 @@ export function useUrls() {
       lastClicked: new Date("2024-01-20"),
     },
     {
-      id: "2", 
+      id: "2",
       title: "GitHub Repository",
       originalUrl: "https://github.com/johndoe/awesome-project",
       shortUrl: "https://ishort.link/github-repo",
@@ -158,7 +154,7 @@ export function useUrls() {
       isPasswordProtected: true,
       createdAt: new Date("2024-01-08"),
       lastClicked: new Date("2024-01-16"),
-    }
+    },
   ]);
 
   const [loading] = useState(false);
@@ -175,17 +171,17 @@ export function useUrls() {
       lastClicked: null,
       hashedPassword: urlData.hashedPassword || null,
     };
-    
-    setUrls(prev => [newUrl, ...prev]);
+
+    setUrls((prev) => [newUrl, ...prev]);
     return newUrl;
   };
 
   const updateUrl = async (id: string, urlData: Partial<UrlData>) => {
-    setUrls(prev => prev.map(url => url.id === id ? { ...url, ...urlData } : url));
+    setUrls((prev) => prev.map((url) => (url.id === id ? { ...url, ...urlData } : url)));
   };
 
   const deleteUrl = async (id: string) => {
-    setUrls(prev => prev.filter(url => url.id !== id));
+    setUrls((prev) => prev.filter((url) => url.id !== id));
   };
 
   return { urls, loading, createUrl, updateUrl, deleteUrl };

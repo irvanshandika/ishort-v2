@@ -31,7 +31,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <Menu className="h-6 w-6" />
             </Button>
             <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Dashboard</h1>
-            <div className="w-10" /> {/* Spacer for centering */}
+            <div className="w-10" />
+            {/* Spacer for centering */}
           </div>
         </div>
 
