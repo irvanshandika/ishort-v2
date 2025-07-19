@@ -18,7 +18,6 @@ export default function HeroSection() {
     if (!url) return;
 
     setIsLoading(true);
-    // Simulate API call
     setTimeout(() => {
       setShortUrl(`ishort.ly/${Math.random().toString(36).substr(2, 8)}`);
       setIsLoading(false);

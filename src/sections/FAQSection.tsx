@@ -31,10 +31,6 @@ const faqs = [
     answer: "Yes! iShort is perfect for businesses, marketers, and organizations. Our Pro and Business plans include features specifically designed for commercial use.",
   },
   {
-    question: "Do you offer an API?",
-    answer: "Yes, we provide a robust REST API for Pro and Business users. You can integrate iShort directly into your applications, websites, and workflows.",
-  },
-  {
     question: "Is my data secure?",
     answer: "Security is our top priority. We use enterprise-grade encryption, secure servers, and follow industry best practices to protect your data and links.",
   },

@@ -6,11 +6,11 @@ import { Link2, Menu, X } from "lucide-react";
 import DropdownMenuList from "./DropdownMenuList";
 
 const navigation = [
+  { name: "Home", href: "#" },
+  { name: "About", href: "#about" },
   { name: "Features", href: "#features" },
   { name: "How It Works", href: "#how-it-works" },
   { name: "Pricing", href: "#pricing" },
-  { name: "Dashboard", href: "/dashboard" },
-  { name: "About", href: "#about" },
 ];
 
 function Navbar() {

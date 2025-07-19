@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/src/components/ui/button";
@@ -9,6 +11,12 @@ import QuickStats from "@/src/components/QuickStats";
 import SidebarSearch from "@/src/components/SidebarSearch";
 import { LayoutDashboard, Link2, BarChart3, Settings, User, HelpCircle, LogOut, Plus, History, Shield, Home } from "lucide-react";
 import { cn } from "@/src/lib/utils";
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
+import { app, db } from "@/src/lib/firebase";
+import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { useTheme } from "next-themes";
 
 interface SidebarProps {
   className?: string;
@@ -78,6 +86,47 @@ const bottomItems = [
 
 export default function DashboardSidebar({ className }: SidebarProps) {
   const pathname = usePathname();
+  const [user, setUser] = useState<any>(null);
+  const router = useRouter();
+  const auth = getAuth();
+  const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    const authInstance = getAuth(app);
+    const unsubscribe = onAuthStateChanged(authInstance, async (user) => {
+      if (user) {
+        setUser(user);
+
+        // Fetch role from Firestore
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          setUser(userSnap.data()); // Ambil peran dari Firestore
+        } else {
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      toast.success(`Sampai Jumpa, ${user?.displayName || "Pengguna"}!`, {
+        style: {
+          background: theme === "dark" ? "#444" : "#333",
+          color: "#fff",
+        },
+      });
+      router.push("/");
+      await signOut(auth);
+    } catch (error: any) {
+      console.log("Error signing out: ", error.message);
+    }
+  };
 
   const isActive = (href: string) => {
     if (href === "/dashboard") {
@@ -169,10 +218,7 @@ export default function DashboardSidebar({ className }: SidebarProps) {
         <Button
           variant="ghost"
           className="w-full justify-start mt-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-          onClick={() => {
-            // Handle logout logic here
-            console.log("Logout clicked");
-          }}>
+          onClick={handleLogout}>
           <LogOut className="h-5 w-5 mr-3" />
           Sign Out
         </Button>
