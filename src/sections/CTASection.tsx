@@ -34,12 +34,12 @@ export default function CTASection() {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+          {" "}
           <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 font-semibold text-lg px-8 py-6 h-auto group">
             Start Shortening Now
             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-          </Button>
-
-          <Button variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10 font-semibold text-lg px-8 py-6 h-auto backdrop-blur-sm">
+          </Button>{" "}
+          <Button variant="outline" size="lg" className="bg-gray-900/80 border-2 border-gray-700 text-white hover:bg-gray-800 hover:border-gray-600 font-semibold text-lg px-8 py-6 h-auto shadow-md backdrop-blur-sm">
             View Pricing Plans
           </Button>
         </div>

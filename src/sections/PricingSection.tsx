@@ -54,7 +54,7 @@ export default function PricingSection() {
               } bg-white dark:bg-gray-800`}>
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center space-x-1">
+                  <div className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center space-x-1">
                     <Star className="h-4 w-4 fill-current" />
                     <span>Most Popular</span>
                   </div>
