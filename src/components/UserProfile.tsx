@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar"
 import { Badge } from "@/src/components/ui/badge";
 import { app, db } from "@/src/lib/firebase";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, collection, query, where, getDocs, } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { UserIcon } from "lucide-react";
 
 export default function UserProfile() {
@@ -27,19 +27,35 @@ export default function UserProfile() {
 
     fetchData();
   }, [user]);
-
   useEffect(() => {
     const authInstance = getAuth(app);
-    const unsubscribe = onAuthStateChanged(authInstance, async (user) => {
-      if (user) {
-        setUser(user);
-
-        // Fetch role from Firestore
-        const userRef = doc(db, "users", user.uid);
+    const unsubscribe = onAuthStateChanged(authInstance, async (firebaseUser) => {
+      if (firebaseUser) {
+        // Fetch complete user data from Firestore
+        const userRef = doc(db, "users", firebaseUser.uid);
         const userSnap = await getDoc(userRef);
         if (userSnap.exists()) {
-          setRoles(userSnap.data().roles); // Ambil peran dari Firestore
+          // Combine Firebase Auth user data with Firestore user data
+          const userData = userSnap.data();
+
+          // Ensure createdAt is properly handled
+          let createdAt = userData.createdAt;
+
+          // If createdAt doesn't exist, use Firebase user creation time
+          if (!createdAt && firebaseUser.metadata && firebaseUser.metadata.creationTime) {
+            createdAt = new Date(firebaseUser.metadata.creationTime);
+          }
+
+          setUser({
+            ...firebaseUser,
+            role: userData.role || "user",
+            plan: userData.plan || "free",
+            status: userData.status || "active",
+            createdAt: createdAt,
+          });
+          setRoles(userData.role);
         } else {
+          setUser(firebaseUser);
           setRoles(null);
         }
       } else {
@@ -50,11 +66,38 @@ export default function UserProfile() {
 
     return () => unsubscribe();
   }, []);
-
   // Format date for display
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
+  const formatDate = (dateInput: any) => {
+    if (!dateInput) return "";
+
+    let date;
+
+    // Handle different date formats that might come from Firestore
+    if (typeof dateInput === "string") {
+      // Handle string format (e.g., "DD-MM-YYYY" from your previous code)
+      const parts = dateInput.split("-");
+      if (parts.length === 3) {
+        // Assuming format is DD-MM-YYYY
+        date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`); // Convert to YYYY-MM-DD for parsing
+      } else {
+        date = new Date(dateInput);
+      }
+    } else if (dateInput.toDate && typeof dateInput.toDate === "function") {
+      // Handle Firestore Timestamp
+      date = dateInput.toDate();
+    } else if (dateInput.seconds) {
+      // Handle Firestore Timestamp in serialized form
+      date = new Date(dateInput.seconds * 1000);
+    } else {
+      // Fallback
+      date = new Date(dateInput);
+    }
+
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return "Invalid date";
+    }
+
     return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
@@ -75,16 +118,23 @@ export default function UserProfile() {
               <UserIcon className="w-4 h-4" />
             </AvatarFallback>
           )}
-        </Avatar>
+        </Avatar>{" "}
         <div className="flex-1 min-w-0">
           <div className="flex items-center space-x-2">
             <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user?.displayName}</p>
-            {user?.plan}
-            {user?.role}
+            {user?.plan && (
+              <Badge variant="outline" className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700">
+                {user.plan === "premium" ? "Premium" : user.plan === "pro" ? "Pro" : "Free"}
+              </Badge>
+            )}
+            {user?.role && (
+              <Badge className={user.role === "admin" ? "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 border-purple-300 dark:border-purple-700" : "bg-gray-100 dark:bg-gray-800"}>
+                {user.role === "admin" ? "Admin" : "User"}
+              </Badge>
+            )}{" "}
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user?.email}</p>{" "}
           <div className="flex items-center justify-between mt-1">
-            {/* <p className="text-xs text-gray-500 dark:text-gray-400">{user.urlCount} URLs created</p> */}
             <p className="text-xs text-gray-500 dark:text-gray-400">{totalShortUrls} URLs created</p>
             {user?.status === "active" && (
               <div className="flex items-center space-x-1">
@@ -93,7 +143,7 @@ export default function UserProfile() {
               </div>
             )}
           </div>
-          {/* {user.createdAt && <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Member since {formatDate(user.createdAt)}</p>} */}
+          {user?.createdAt && <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Member since {formatDate(user.createdAt)}</p>}
         </div>
       </div>
     </div>
