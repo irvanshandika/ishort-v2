@@ -1,0 +1,28 @@
+# iShort Robots.txt
+# https://ishort.ly
+
+# Allow all web crawlers access to all content
+User-agent: *
+Allow: /
+
+# Disallow crawling of private and authenticated sections
+Disallow: /dashboard
+Disallow: /dashboard/
+Disallow: /dashboard/*
+Disallow: /auth/
+Disallow: /api/
+
+# Disallow crawling of short URLs (they should be accessed directly)
+# Allow the route to exist in sitemap but not crawled by robots
+Disallow: /[slug]
+
+# Disallow error pages
+Disallow: /404
+Disallow: /error-404-animated
+Disallow: /forbidden
+
+# Specify sitemap location
+Sitemap: https://ishort.ly/sitemap.xml
+
+# Crawl delay for high-traffic bots (optional, adjust if needed)
+# Crawl-delay: 10
