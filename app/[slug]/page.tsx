@@ -34,6 +34,17 @@ export default function RedirectPage() {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [password, setPassword] = useState("");
   const [verifying, setVerifying] = useState(false);
+
+  // Set the document title based on URL data
+  useEffect(() => {
+    if (urlData?.title) {
+      document.title = `${urlData.title} | iShort`;
+    } else if (error) {
+      document.title = "URL Not Found | iShort";
+    } else {
+      document.title = "Redirecting... | iShort";
+    }
+  }, [urlData, error]);
   const fetchUrlData = useCallback(async () => {
     try {
       setLoading(true);

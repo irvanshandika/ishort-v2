@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/src/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 interface ChartData {
   name: string;
@@ -26,16 +26,16 @@ export function DashboardCharts({ chartData, pieData }: ChartsProps) {
         <CardHeader>
           <CardTitle>Click Performance</CardTitle>
           <CardDescription>Top performing URLs by click count</CardDescription>
-        </CardHeader>
+        </CardHeader>{" "}
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData}>
+            <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
               <RechartsTooltip />
-              <Bar dataKey="clicks" fill="#3B82F6" />
-            </BarChart>
+              <Line type="monotone" dataKey="clicks" stroke="#3B82F6" strokeWidth={2} dot={{ r: 4 }} />
+            </LineChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>

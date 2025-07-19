@@ -3,6 +3,11 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/src/components/ui/button";
 import { Home, ArrowLeft, Zap, Star } from "lucide-react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "404 - Page Not Found",
+};
 
 export default function AnimatedNotFound() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });

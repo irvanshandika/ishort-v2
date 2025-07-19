@@ -1,7 +1,12 @@
+import { Metadata } from "next";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/src/components/ui/card";
 import { Button } from "@/src/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Forbidden Access",
+};
 
 export default function ForbiddenPage() {
   return (
