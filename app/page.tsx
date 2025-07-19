@@ -1,4 +1,3 @@
-import { Metadata } from "next";
 import Navbar from "@/src/components/Navbar";
 import ScrollToTop from "@/src/components/ScrollToTop";
 import HeroSection from "@/src/sections/HeroSection";
@@ -10,10 +9,6 @@ import PricingSection from "@/src/sections/PricingSection";
 import FAQSection from "@/src/sections/FAQSection";
 import CTASection from "@/src/sections/CTASection";
 import Footer from "@/src/sections/Footer";
-
-export const metadata: Metadata = {
-  title: "Home",
-};
 
 export default function Home() {
   return (
