@@ -66,6 +66,7 @@ const SignUpPage = () => {
         signType: "credential",
         photoURL: `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.displayName)}&background=random`,
         role: "user",
+        plan: "free",
         status: "active",
         createdAt: createdAtFormatted,
       });
@@ -95,6 +96,7 @@ const SignUpPage = () => {
         signType: "google",
         photoUrl: result.user.photoURL,
         role: "user",
+        plan: "free",
         status: "active",
         createdAt: createdAtFormatted,
       });

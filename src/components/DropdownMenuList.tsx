@@ -17,10 +17,10 @@ export default function DropdownMenuList() {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [user, setUser] = useState<User | null>(null);
+  const [plan, setPlan] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [isUserExists, setIsUserExists] = useState(false);
   const auth = getAuth();
-
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
@@ -28,36 +28,20 @@ export default function DropdownMenuList() {
         const userDocRef = doc(db, "users", currentUser.uid);
         const userDoc = await getDoc(userDocRef);
         setIsUserExists(userDoc.exists());
-      } else {
-        setIsUserExists(false);
-      }
-    });
 
-    return () => unsubscribe();
-  }, [auth]);
-
-  useEffect(() => {
-    const authInstance = getAuth(app);
-    const unsubscribe = onAuthStateChanged(authInstance, async (user) => {
-      if (user) {
-        setUser(user);
-
-        // Fetch role from Firestore
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          setRole(userSnap.data().role); // Ambil peran dari Firestore
-        } else {
-          setRole(null);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setRole(userData.role || null);
+          setPlan(userData.plan || "FREE");
         }
       } else {
-        setUser(null);
+        setIsUserExists(false);
         setRole(null);
+        setPlan(null);
       }
     });
-
     return () => unsubscribe();
-  }, []);
+  }, [auth]);
 
   const handleLogout = async () => {
     try {
@@ -93,10 +77,10 @@ export default function DropdownMenuList() {
                 ) : (
                   <AvatarFallback className="bg-blue-500 text-white text-sm font-medium">{user.displayName?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
                 )}
-              </Avatar>
+              </Avatar>{" "}
               <div className="flex flex-col text-left min-w-0">
                 <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{user?.displayName || "Pengguna"}</span>
-                <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">PRO</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{plan || "FREE"}</span>
               </div>
               <ChevronUp className="h-4 w-4 text-gray-400 ml-auto" />
             </div>
@@ -115,11 +99,11 @@ export default function DropdownMenuList() {
                   ) : (
                     <AvatarFallback className="bg-blue-500 text-white font-medium">{user.displayName?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
                   )}
-                </Avatar>
+                </Avatar>{" "}
                 <div className="flex flex-col min-w-0 flex-1">
                   <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{user?.displayName || "Pengguna"}</span>
                   <span className="text-xs text-gray-500 dark:text-gray-400 truncate">{user?.email}</span>
-                  <span className="text-xs text-blue-600 dark:text-blue-400 font-medium uppercase tracking-wide">PRO</span>
+                  <span className="text-xs text-blue-600 dark:text-blue-400 font-medium uppercase tracking-wide">{plan || "FREE"}</span>
                 </div>
               </div>
             </div>
@@ -127,13 +111,13 @@ export default function DropdownMenuList() {
             {/* Menu Items */}
             <div className="py-1">
               {/* {role === "admin" || role === "teknisi" ? ( */}
-                <DropdownMenuItem onClick={() => router.push("/dashboard")} className="px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer flex items-center rounded-lg mx-1 transition-colors">
-                  <LayoutDashboard className="mr-3 h-4 w-4 text-gray-600 dark:text-gray-400" />
-                  <span className="text-sm text-gray-900 dark:text-gray-100">Dashboard</span>
-                </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/dashboard")} className="px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer flex items-center rounded-lg mx-1 transition-colors">
+                <LayoutDashboard className="mr-3 h-4 w-4 text-gray-600 dark:text-gray-400" />
+                <span className="text-sm text-gray-900 dark:text-gray-100">Dashboard</span>
+              </DropdownMenuItem>
               {/* ) : null} */}
 
-              <DropdownMenuItem onClick={() => router.push("/settings/profile")} className="px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer flex items-center rounded-lg mx-1 transition-colors">
+              <DropdownMenuItem onClick={() => router.push("/dashboard/profile")} className="px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer flex items-center rounded-lg mx-1 transition-colors">
                 <Settings className="mr-3 h-4 w-4 text-gray-600 dark:text-gray-400" />
                 <span className="text-sm text-gray-900 dark:text-gray-100">Profile Settings</span>
               </DropdownMenuItem>
