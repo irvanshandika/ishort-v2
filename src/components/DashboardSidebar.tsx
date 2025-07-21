@@ -50,10 +50,10 @@ const sidebarItems = [
     highlight: true,
   },
   {
-    title: "History",
-    href: "/dashboard/history",
-    icon: History,
-    description: "Click history",
+    title: "Management Users",
+    href: "/dashboard/users",
+    icon: User,
+    description: "Manage users",
   },
   {
     title: "Security",
