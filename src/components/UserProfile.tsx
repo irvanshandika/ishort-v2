@@ -107,10 +107,11 @@ export default function UserProfile() {
   return (
     <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
       <div className="flex items-center space-x-3">
-        <Avatar className="h-10 w-10">
+        {" "}
+        <Avatar className="h-10 w-10 flex-shrink-0">
           {user && user.photoURL ? (
             <>
-              <AvatarImage src={user.photoURL} alt="Profile" />
+              <AvatarImage src={user.photoURL} alt="Profile" className="object-cover" />
               <AvatarFallback className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200">{user.displayName?.charAt(0).toUpperCase()}</AvatarFallback>
             </>
           ) : (

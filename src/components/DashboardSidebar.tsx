@@ -112,19 +112,25 @@ export default function DashboardSidebar({ className }: SidebarProps) {
 
     return () => unsubscribe();
   }, []);
-
   const handleLogout = async () => {
     try {
+      await signOut(auth);
       toast.success(`Sampai Jumpa, ${user?.displayName || "Pengguna"}!`, {
         style: {
           background: theme === "dark" ? "#444" : "#333",
           color: "#fff",
         },
       });
-      router.push("/");
-      await signOut(auth);
+      // Menggunakan window.location.href untuk memastikan redirect ke halaman utama
+      window.location.href = "/";
     } catch (error: any) {
       console.log("Error signing out: ", error.message);
+      toast.error("Gagal keluar. Silakan coba lagi.", {
+        style: {
+          background: theme === "dark" ? "#444" : "#333",
+          color: "#fff",
+        },
+      });
     }
   };
 
@@ -215,10 +221,7 @@ export default function DashboardSidebar({ className }: SidebarProps) {
           <span>Back to Home</span>
         </Link>
 
-        <Button
-          variant="ghost"
-          className="w-full justify-start mt-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-          onClick={handleLogout}>
+        <Button variant="ghost" className="w-full justify-start mt-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={handleLogout}>
           <LogOut className="h-5 w-5 mr-3" />
           Sign Out
         </Button>

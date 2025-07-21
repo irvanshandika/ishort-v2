@@ -68,10 +68,11 @@ export default function DropdownMenuList() {
         <>
           <DropdownMenuTrigger className="outline-none focus:outline-none">
             <div className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer">
-              <Avatar className="h-8 w-8">
+              {" "}
+              <Avatar className="h-8 w-8 flex-shrink-0">
                 {user && user.photoURL ? (
                   <>
-                    <AvatarImage src={user.photoURL} className="w-full" alt="Profile" />
+                    <AvatarImage src={user.photoURL} className="object-cover" alt="Profile" />
                     <AvatarFallback className="bg-blue-500 text-white text-sm font-medium">{user.displayName?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
                   </>
                 ) : (
@@ -90,10 +91,11 @@ export default function DropdownMenuList() {
             {/* Header Profile */}
             <div className="px-3 py-3 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center space-x-3">
-                <Avatar className="h-10 w-10">
+                {" "}
+                <Avatar className="h-10 w-10 flex-shrink-0">
                   {user && user.photoURL ? (
                     <>
-                      <AvatarImage src={user.photoURL} className="w-full" alt="Profile" />
+                      <AvatarImage src={user.photoURL} className="object-cover" alt="Profile" />
                       <AvatarFallback className="bg-blue-500 text-white font-medium">{user.displayName?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
                     </>
                   ) : (
