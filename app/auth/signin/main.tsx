@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { auth, db } from "@/src/lib/firebase";
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { collection, query, where, getDocs } from "firebase/firestore";
+import { checkUserBanStatus } from "@/src/lib/banUtils";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Button } from "@/src/components/ui/button";
@@ -51,11 +52,21 @@ export default function SignInPage() {
         toast.error(`Maaf, akun ${data.email} belum terdaftar.`);
         return;
       }
-
       await signInWithEmailAndPassword(auth, data.email, data.password);
 
-      toast.dismiss(loadingToast);
+      // Check if user is banned after successful authentication
       const user = auth.currentUser;
+      if (user) {
+        const banStatus = await checkUserBanStatus(user.uid);
+        if (banStatus.isBanned) {
+          toast.dismiss(loadingToast);
+          toast.error("Akun Anda telah diblokir dan tidak dapat mengakses layanan ini.");
+          await auth.signOut();
+          return;
+        }
+      }
+
+      toast.dismiss(loadingToast);
       toast.success(`Selamat Datang Kembali, ${user?.displayName || data.email}!`);
       router.push("/");
     } catch (error: any) {
@@ -81,11 +92,19 @@ export default function SignInPage() {
       const result = await signInWithPopup(auth, provider);
 
       const userExists = await checkUserExists(result.user.email!);
-
       if (!userExists) {
         await auth.signOut();
         toast.dismiss(loadingToast);
         toast.error(`Maaf, akun ${result.user.email} belum terdaftar.`);
+        return;
+      }
+
+      // Check if user is banned after successful authentication
+      const banStatus = await checkUserBanStatus(result.user.uid);
+      if (banStatus.isBanned) {
+        toast.dismiss(loadingToast);
+        toast.error("Akun Anda telah diblokir dan tidak dapat mengakses layanan ini.");
+        await auth.signOut();
         return;
       }
 

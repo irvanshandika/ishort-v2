@@ -4,11 +4,12 @@ import { useParams, useRouter } from "next/navigation";
 import { doc, updateDoc, increment, addDoc, collection } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "@/src/lib/firebase";
+import { checkUserBanStatus } from "@/src/lib/banUtils";
 import bcrypt from "bcryptjs";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card";
-import { Loader2, ExternalLink, Lock } from "lucide-react";
+import { Loader2, ExternalLink, Lock, Ban } from "lucide-react";
 import toast from "react-hot-toast";
 
 interface UrlData {
@@ -36,6 +37,28 @@ export default function RedirectPage() {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [password, setPassword] = useState("");
   const [verifying, setVerifying] = useState(false);
+  const [isBanned, setIsBanned] = useState(false);
+  const [checkingBan, setCheckingBan] = useState(false);
+  // Check if user is banned before allowing URL access
+  useEffect(() => {
+    const checkBanStatus = async () => {
+      if (!user || loadingAuth) return;
+
+      setCheckingBan(true);
+      try {
+        const banStatus = await checkUserBanStatus(user.uid);
+        setIsBanned(banStatus.isBanned);
+      } catch (error) {
+        console.error("Error checking ban status:", error);
+      } finally {
+        setCheckingBan(false);
+      }
+    };
+
+    if (!loadingAuth) {
+      checkBanStatus();
+    }
+  }, [user, loadingAuth]);
 
   // Set the document title based on URL data
   useEffect(() => {
@@ -96,10 +119,17 @@ export default function RedirectPage() {
     }
   };
   useEffect(() => {
-    if (!slug || loadingAuth) return;
+    if (!slug || loadingAuth || checkingBan) return;
+
+    // If user is banned, don't allow URL access
+    if (user && isBanned) {
+      router.push("/banned");
+      return;
+    }
+
     fetchUrlData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug, loadingAuth]);
+  }, [slug, loadingAuth, checkingBan, isBanned]);
   const redirectToUrl = async (urlInfo: UrlData) => {
     try {
       // Update click count and last clicked timestamp
@@ -153,14 +183,40 @@ export default function RedirectPage() {
       setVerifying(false);
     }
   };
-
-  if (loading) {
+  if (loading || checkingBan) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+          <p className="text-gray-600 dark:text-gray-400">{checkingBan ? "Checking account status..." : "Loading..."}</p>
         </div>
+      </div>
+    );
+  }
+
+  if (user && isBanned) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+        <Card className="w-full max-w-md border-red-200 dark:border-red-800">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-4">
+              <Ban className="h-6 w-6 text-red-600 dark:text-red-400" />
+            </div>
+            <CardTitle className="text-red-600">Access Denied</CardTitle>
+            <CardDescription>Your account has been suspended. You cannot access shortened URLs while your account is banned.</CardDescription>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">Please contact support if you believe this is an error.</p>
+            <div className="flex flex-col gap-2">
+              <Button onClick={() => router.push("/banned")} className="w-full">
+                View Ban Details
+              </Button>
+              <Button variant="outline" onClick={() => router.push("/")} className="w-full">
+                Go to Homepage
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

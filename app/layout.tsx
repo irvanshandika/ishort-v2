@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/src/components/theme-provider";
 import { UserProvider } from "@/src/hooks/useUser";
+import { BanCheck } from "@/src/components/BanCheck";
 import { Toaster } from "react-hot-toast";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
@@ -63,9 +64,11 @@ export default function RootLayout({
       <body className="antialiased font-open-sans">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <UserProvider>
-            <Toaster position="top-right" />
-            {children}
-            <GoogleAnalytics gaId="G-GHCHMVJH3X" />
+            <BanCheck>
+              <Toaster position="top-right" />
+              {children}
+              <GoogleAnalytics gaId="G-GHCHMVJH3X" />
+            </BanCheck>
           </UserProvider>
         </ThemeProvider>
       </body>
