@@ -42,7 +42,13 @@ const formatDate = (dateInput: Timestamp | Date | string | undefined): string =>
     let date: Date;
 
     if (typeof dateInput === "string") {
-      date = new Date(dateInput);
+      // Check if it's in DD-MM-YYYY format (from signup)
+      if (dateInput.match(/^\d{2}-\d{2}-\d{4}$/)) {
+        const [day, month, year] = dateInput.split("-");
+        date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      } else {
+        date = new Date(dateInput);
+      }
     } else if (dateInput instanceof Date) {
       date = dateInput;
     } else if (dateInput && typeof dateInput === "object" && "toDate" in dateInput) {
@@ -136,14 +142,13 @@ function DashboardUsers() {
     try {
       const usersCollection = collection(db, "users");
       const usersSnapshot = await getDocs(usersCollection);
-
       const usersList: UserData[] = usersSnapshot.docs.map((doc) => {
         const data = doc.data();
         return {
           uid: doc.id,
           displayName: data.displayName || data.email || "Unknown User",
           email: data.email || "",
-          photoUrl: data.photoUrl || "",
+          photoUrl: data.photoUrl || data.photoURL || "",
           role: data.role || "user",
           plan: data.plan || "free",
           status: data.status || "active",

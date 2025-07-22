@@ -1,4 +1,5 @@
 import { Link2, Twitter, Github, Linkedin, Mail } from "lucide-react";
+import Link from "next/link";
 
 const footerLinks = {
   product: [
@@ -126,7 +127,9 @@ export default function Footer() {
             <div className="text-gray-400 text-sm">© {new Date().getFullYear()} iShort. All rights reserved.</div>
 
             <div className="flex items-center space-x-6 text-sm text-gray-400">
-              <span>Made with ❤️ for the web</span>
+              <span>
+                Made with ❤️ <Link href="https://irvans.my.id" target="_blank">Irvan</Link>
+              </span>
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                 <span>All systems operational</span>
