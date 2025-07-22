@@ -124,7 +124,7 @@ export default function DashboardMain() {
   const analytics = {
     totalUrls: userUrls.length,
     totalClicks: userUrls.reduce((sum, url) => sum + (url.clicks || 0), 0),
-    todayClicks: 23, // TODO: Calculate real today clicks
+    todayClicks: 23,
     trend: "up" as "up" | "down" | "stable",
   };
 
@@ -279,9 +279,9 @@ export default function DashboardMain() {
       <div className="max-w-7xl mx-auto">
         <DashboardHeader title="Dashboard" description="Manage your shortened URLs and track their performance" />
 
-        <StatsCards analytics={analytics} />
+        <StatsCards analytics={analytics} userUrls={userUrls} currentUserId={currentUser?.uid} />
 
-        <DashboardCharts chartData={chartData} pieData={pieData} />
+        <DashboardCharts chartData={chartData} pieData={pieData} userUrls={userUrls} currentUserId={currentUser?.uid} />
 
         {loading ? (
           <div className="text-center py-8">Loading...</div>

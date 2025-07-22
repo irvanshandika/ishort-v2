@@ -1,8 +1,9 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { doc, updateDoc, increment } from "firebase/firestore";
-import { db } from "@/src/lib/firebase";
+import { doc, updateDoc, increment, addDoc, collection } from "firebase/firestore";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth, db } from "@/src/lib/firebase";
 import bcrypt from "bcryptjs";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
@@ -27,6 +28,7 @@ export default function RedirectPage() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
+  const [user, loadingAuth] = useAuthState(auth);
 
   const [urlData, setUrlData] = useState<UrlData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -45,7 +47,7 @@ export default function RedirectPage() {
       document.title = "Redirecting... | iShort";
     }
   }, [urlData, error]);
-  const fetchUrlData = useCallback(async () => {
+  const fetchUrlData = async () => {
     try {
       setLoading(true);
 
@@ -92,13 +94,12 @@ export default function RedirectPage() {
       setError("Failed to fetch URL data");
       setLoading(false);
     }
-  }, [slug]);
-
+  };
   useEffect(() => {
-    if (!slug) return;
+    if (!slug || loadingAuth) return;
     fetchUrlData();
-  }, [slug, fetchUrlData]);
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug, loadingAuth]);
   const redirectToUrl = async (urlInfo: UrlData) => {
     try {
       // Update click count and last clicked timestamp
@@ -108,10 +109,22 @@ export default function RedirectPage() {
         lastClicked: new Date(),
       });
 
+      // Track click in click_url collection
+      await addDoc(collection(db, "click_url"), {
+        urlId: urlInfo.id,
+        userId: user?.uid || null, // null for anonymous users
+        userEmail: user?.email || null,
+        clickedAt: new Date(),
+        userAgent: navigator.userAgent,
+        shortUrl: urlInfo.shortUrl,
+        longUrl: urlInfo.longUrl,
+        urlTitle: urlInfo.title,
+      });
+
       // Redirect to the original URL
       window.location.href = urlInfo.longUrl;
     } catch (err) {
-      console.error("Error updating click count:", err);
+      console.error("Error updating click count or tracking click:", err);
       // Still redirect even if update fails
       window.location.href = urlInfo.longUrl;
     }
