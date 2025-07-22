@@ -139,11 +139,19 @@ export default function DashboardMain() {
       usePassword: false,
       password: "",
     },
-  });
-
-  // Create chart data from user URLs
-  const chartData = userUrls.slice(0, 10).map((url) => ({
-    name: url.shortUrl, // shortUrl now contains only the slug
+  }); // Create chart data from user URLs
+  const chartData = userUrls.slice(0, 10).map((url, index) => ({
+    name: url.createdAt
+      ? new Date(url.createdAt).toLocaleDateString("id-ID", {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        })
+      : new Date(Date.now() - index * 24 * 60 * 60 * 1000).toLocaleDateString("id-ID", {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        }),
     clicks: url.clicks,
   }));
 

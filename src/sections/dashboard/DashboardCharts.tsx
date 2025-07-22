@@ -31,6 +31,17 @@ interface UrlData {
   title: string;
   shortUrl: string;
   clicks?: number;
+  createdAt?: Date;
+  originalUrl?: string;
+  isPasswordProtected?: boolean;
+  lastClicked?: Date | null;
+  hashedPassword?: string | null;
+}
+
+interface TooltipPayload {
+  value: number;
+  name: string;
+  payload?: Record<string, unknown>;
 }
 
 interface ChartsProps {
@@ -42,7 +53,49 @@ interface ChartsProps {
 
 export function DashboardCharts({ chartData, pieData, userUrls = [], currentUserId }: ChartsProps) {
   const [realClickData, setRealClickData] = useState<ChartData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Custom tooltip component for better dark mode support
+  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: TooltipPayload[]; label?: string }) => {
+    if (active && payload && payload.length) {
+      // Find the corresponding URL for this data point
+      const clickCount = payload[0].value;
+      const correspondingUrl = userUrls.find((url) => {
+        const urlDate = url.createdAt
+          ? new Date(url.createdAt).toLocaleDateString("id-ID", {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            })
+          : null;
+        return urlDate === label;
+      });
+
+      return (
+        <div className="bg-background border border-border rounded-md p-3 shadow-lg">
+          {correspondingUrl && <p className="text-sm mb-1">{correspondingUrl.title || correspondingUrl.shortUrl}</p>}
+          <p className="text-foreground">
+            <span className="font-medium">Clicks: </span>
+            <span className="text-primary">{clickCount}</span>
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const CustomPieTooltip = ({ active, payload }: { active?: boolean; payload?: TooltipPayload[] }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-background border border-border rounded-md p-3 shadow-lg">
+          <p className="text-foreground font-medium">{payload[0].name}</p>
+          <p className="text-foreground">
+            <span className="font-medium">Count: </span>
+            <span className="text-primary">{payload[0].value}</span>
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   useEffect(() => {
     const fetchClickData = async () => {
@@ -80,16 +133,44 @@ export function DashboardCharts({ chartData, pieData, userUrls = [], currentUser
           .forEach((click) => {
             const currentCount = userClicksMap.get(click.urlId) || 0;
             userClicksMap.set(click.urlId, currentCount + 1);
-          });
-
-        // Create chart data based on real click data
+          }); // Create chart data based on real click data
         const realChartData: ChartData[] = userUrls
-          .map((url) => ({
-            name: url.shortUrl || url.title,
-            clicks: userClicksMap.get(url.id) || 0,
-          }))
+          .map((url, index) => {
+            // Use URL creation date for X-axis display
+            let displayDate: string;
+            if (url.createdAt) {
+              displayDate = new Date(url.createdAt).toLocaleDateString("id-ID", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              });
+            } else {
+              // If no creation date, use current date with index offset to show different dates
+              const offsetDate = new Date();
+              offsetDate.setDate(offsetDate.getDate() - index);
+              displayDate = offsetDate.toLocaleDateString("id-ID", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              });
+            }
+
+            console.log("URL data:", {
+              title: url.title,
+              shortUrl: url.shortUrl,
+              displayDate,
+              clicks: userClicksMap.get(url.id) || 0,
+            });
+
+            return {
+              name: displayDate,
+              clicks: userClicksMap.get(url.id) || 0,
+            };
+          })
           .sort((a, b) => b.clicks - a.clicks)
           .slice(0, 10); // Top 10 URLs
+
+        console.log("Final chart data:", realChartData);
 
         setRealClickData(realChartData);
       } catch (error) {
@@ -103,8 +184,11 @@ export function DashboardCharts({ chartData, pieData, userUrls = [], currentUser
 
     fetchClickData();
   }, [userUrls, currentUserId, chartData]);
-
   const displayData = loading ? chartData : realClickData;
+
+  console.log("Display data being used:", displayData);
+  console.log("Loading state:", loading);
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
       {" "}
@@ -114,12 +198,13 @@ export function DashboardCharts({ chartData, pieData, userUrls = [], currentUser
           <CardDescription>{loading ? "Loading real click data..." : "Top performing URLs by actual click count from database"}</CardDescription>
         </CardHeader>
         <CardContent>
+          {" "}
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={displayData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
-              <RechartsTooltip />
+              <RechartsTooltip content={<CustomTooltip />} />
               <Line type="monotone" dataKey="clicks" stroke="#3B82F6" strokeWidth={2} dot={{ r: 4 }} />
             </LineChart>
           </ResponsiveContainer>
@@ -131,6 +216,7 @@ export function DashboardCharts({ chartData, pieData, userUrls = [], currentUser
           <CardDescription>Distribution of protected vs public URLs</CardDescription>
         </CardHeader>
         <CardContent>
+          {" "}
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie data={pieData} cx="50%" cy="50%" labelLine={false} label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`} outerRadius={80} fill="#8884d8" dataKey="value">
@@ -138,7 +224,7 @@ export function DashboardCharts({ chartData, pieData, userUrls = [], currentUser
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <RechartsTooltip />
+              <RechartsTooltip content={<CustomPieTooltip />} />
             </PieChart>
           </ResponsiveContainer>
         </CardContent>
