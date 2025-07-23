@@ -124,7 +124,7 @@ export default function DashboardMain() {
   const analytics = {
     totalUrls: userUrls.length,
     totalClicks: userUrls.reduce((sum, url) => sum + (url.clicks || 0), 0),
-    todayClicks: 23,
+    todayClicks: 0,
     trend: "up" as "up" | "down" | "stable",
   };
 

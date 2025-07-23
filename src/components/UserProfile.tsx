@@ -129,7 +129,7 @@ export default function UserProfile() {
               </Badge>
             )}
             {user?.role && (
-              <Badge className={user.role === "admin" ? "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 border-purple-300 dark:border-purple-700" : "bg-gray-100 dark:bg-gray-800"}>
+              <Badge className={user.role === "admin" ? "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 border-purple-300 dark:border-purple-700" : "bg-gray-100 dark:bg-gray-800 dark:text-white"}>
                 {user.role === "admin" ? "Admin" : "User"}
               </Badge>
             )}{" "}

@@ -158,42 +158,46 @@ export default function DashboardSidebar({ className }: SidebarProps) {
         <div className="mb-6">
           <SidebarSearch />
         </div>
-
         {/* Quick Stats */}
         <div className="mb-6">
           <QuickStats />
-        </div>
-
+        </div>{" "}
         <nav className="space-y-2">
-          {sidebarItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                "hover:bg-gray-100 dark:hover:bg-gray-800",
-                isActive(item.href) ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800" : "text-gray-600 dark:text-gray-400",
-                item.highlight && "bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600"
-              )}>
-              <div className="flex items-center space-x-3">
-                <item.icon className={cn("h-5 w-5", item.highlight && "text-white")} />
-                <div className="flex flex-col">
-                  <span className={cn(item.highlight && "text-white")}>{item.title}</span>
-                  <span className={cn("text-xs opacity-70", item.highlight && "text-white/80")}>{item.description}</span>
+          {sidebarItems
+            .filter((item) => {
+              // Hide Management Users if user is not admin
+              if (item.title === "Management Users" && user?.role !== "admin") {
+                return false;
+              }
+              return true;
+            })
+            .map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                  "hover:bg-gray-100 dark:hover:bg-gray-800",
+                  isActive(item.href) ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800" : "text-gray-600 dark:text-gray-400",
+                  item.highlight && "bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600"
+                )}>
+                <div className="flex items-center space-x-3">
+                  <item.icon className={cn("h-5 w-5", item.highlight && "text-white")} />
+                  <div className="flex flex-col">
+                    <span className={cn(item.highlight && "text-white")}>{item.title}</span>
+                    <span className={cn("text-xs opacity-70", item.highlight && "text-white/80")}>{item.description}</span>
+                  </div>
                 </div>
-              </div>
-              {item.badge && (
-                <Badge variant="secondary" className="ml-auto">
-                  {item.badge}
-                </Badge>
-              )}
-            </Link>
-          ))}
+                {item.badge && (
+                  <Badge variant="secondary" className="ml-auto">
+                    {item.badge}
+                  </Badge>
+                )}
+              </Link>
+            ))}
         </nav>
-
         {/* Divider */}
         <div className="my-6 border-t border-gray-200 dark:border-gray-800"></div>
-
         {/* Bottom Navigation */}
         <nav className="space-y-2">
           {bottomItems.map((item) => (
