@@ -50,9 +50,8 @@ export function BanCheck({ children }: BanCheckProps) {
       checkBanStatus();
     }
   }, [user, loading, router, pathname, isExemptPath]);
-
-  // Show loading while checking authentication or ban status
-  if (loading || (checkingBan && !isExemptPath && user)) {
+  // Show loading while checking authentication or ban status only in dashboard pages
+  if ((loading || (checkingBan && !isExemptPath && user)) && pathname.startsWith("/dashboard")) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
